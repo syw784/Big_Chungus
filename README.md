@@ -13,8 +13,16 @@ Features:
 
 ![Chungus2](https://raw.githubusercontent.com/syw784/Big_Chungus/master/funhouse/chungus2.PNG)
 
+2.5. delete folders by pressing CTRL + DEL.
+
+
+
 3. zoom in/out:
 
 ![Chungus3](https://raw.githubusercontent.com/syw784/Big_Chungus/master/funhouse/cjungeus3.PNG)
+
+4. uses a shit load of memory.
+
+
 
 thats about it.
