@@ -5,7 +5,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtGui import QImage, QPixmap, QPalette, QResizeEvent
 from PyQt5.QtWidgets import QLabel, QSizePolicy, QScrollArea, QMessageBox, QMainWindow, QMenu, QAction, \
     qApp, QFileDialog
-import os, time
+import os, shutil
 
 class MangaView(QMainWindow):
     
@@ -25,13 +25,13 @@ class MangaView(QMainWindow):
         self.scrollVLayout = QtWidgets.QVBoxLayout(self.scrollAreaWidgetContents)
         self.scrollArea.setWidget(self.scrollAreaWidgetContents)
 
-        self.open_the_waygate = QAction("open", shortcut="Ctrl+O", triggered=self.load_images_from_waygate)
-        self.remove_ALL_label_menu = QAction("&clear", triggered=self.remove_ALL_label)
-        self.test_menu = QAction("&testo", shortcut="Ctrl+F", triggered=self.test)
-        self.zoomInAct = QAction("Zoom &In (25%)", shortcut="Up", triggered=self.zoomIn)
-        self.zoomOutAct = QAction("Zoom &Out (25%)", shortcut="Down", triggered=self.zoomOut)
-        self.normalSizeAct = QAction("&Reset Scale", shortcut="0", triggered=self.normalSize)
-        self.about_menu = QAction("&About", triggered=self.about)
+        self.open_the_waygate = QAction("Open", shortcut="Ctrl+O", triggered=self.load_images_from_waygate)
+        self.remove_ALL_label_menu = QAction("Clear", triggered=self.remove_ALL_label)
+        self.test_menu = QAction("testo", shortcut="Ctrl+F", triggered=self.test)
+        self.zoomInAct = QAction("Zoom In (25%)", shortcut="Up", triggered=self.zoomIn)
+        self.zoomOutAct = QAction("Zoom Out (25%)", shortcut="Down", triggered=self.zoomOut)
+        self.normalSizeAct = QAction("Reset Scale", shortcut="0", triggered=self.normalSize)
+        self.about_menu = QAction("About", triggered=self.about)
         
         self.menubar = QtWidgets.QMenuBar(self)
         self.setMenuBar(self.menubar)
@@ -75,14 +75,23 @@ class MangaView(QMainWindow):
             e.accept()
 
     def keyPressEvent(self, e):
+
         if (e.key() == QtCore.Qt.Key_Delete):
             if self.labels == []:
-                return None
+                return
+            if e.modifiers() and QtCore.Qt.ShiftModifier:
+                if QMessageBox.question(self, 'Confirm', 'about to delete ' + 
+                self.address,
+                QMessageBox.Yes, QMessageBox.No) == QMessageBox.Yes:
+                    self.remove_ALL_label()
+                    shutil.rmtree(self.address)
+                return
             if QMessageBox.question(self, 'Confirm', 'about to delete ' + 
             self.address + '/' + self.accepted[self.get_current_index()], 
             QMessageBox.Yes, QMessageBox.No) == QMessageBox.Yes:
                 os.remove(self.address + '/' + self.accepted[self.get_current_index()])
-                #self.labels[self.get_current_index()].setParent(None)
+                #self.labels[self.get_current_index()].setParent(None)]
+                self.accepted.pop(self.get_current_index())
                 self.labels.pop(self.get_current_index()).setParent(None)
 
     def dropEvent(self, e):
@@ -127,14 +136,15 @@ class MangaView(QMainWindow):
         self.scale = scale
         if len(self.labels) > 0:
             i = self.scrollArea.verticalScrollBar()
-            i.setValue(i.value() * scale / self.labels[0].pixmap().size().width() * self.get_content_width())
+            i.setValue(int(i.value() * scale / self.labels[0].pixmap().size().width() * self.get_content_width()))
         for i in self.labels:#.scaled(640, 512, Qt::KeepAspectRatio))
             j = self.label_pix[i]
-            i.setPixmap(j.scaledToWidth(self.get_content_width() * scale))
+            i.setPixmap(j.scaledToWidth(int(self.get_content_width() * scale)))
             #i.resize(self.scale * i.pixmap().size())
 
     def resizeEvent(self, event):
         self.set_scale(self.get_scale())
+        self.scrollArea.verticalScrollBar().setSingleStep(int(self.height() / 20))
         #print('poo')
 
     def add_label(self, path, index = 'last'):
@@ -163,6 +173,8 @@ class MangaView(QMainWindow):
             self.scrollVLayout.itemAt(i).widget().setParent(None) """
         self.labels = []
         self.label_pix = {}
+        os.chdir('c:/')
+
         
     def zoomIn(self):
         self.set_scale(min(self.get_scale() + 0.2, 2))
