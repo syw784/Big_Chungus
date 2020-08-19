@@ -208,5 +208,4 @@ if __name__ == "__main__":
     import sys
     app = QtWidgets.QApplication(sys.argv)
     ui = MangaView()
-    #ui.load_images()#r'C:\Users\DevilG\desktop')
     sys.exit(app.exec_())
